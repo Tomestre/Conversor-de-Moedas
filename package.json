@@ -10,6 +10,9 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@react-native-picker/picker": "^2.4.8",
+    "axios": "^0.20.0-0",
+    "npm": "^8.19.2",
     "react": "18.1.0",
     "react-native": "0.70.3"
   },

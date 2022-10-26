@@ -1,117 +1,81 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
-import type {Node} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
+import styles from './style.js';
+import {Picker} from '@react-native-picker/picker';
+import api from './src/services/api.js';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+export default function App() {
+  const [moedas, setMoedas] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-/* $FlowFixMe[missing-local-annot] The type annotation(s) required by Flow's
- * LTI update could not be added via codemod */
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+  let [moedaSelecionada, setMoedaSelecionada] = useState(null);
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+  //Request array das moedas
+  useEffect(() => {
+    async function loadingMoedas() {
+      const response = await api.get('all');
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+      let arrayMoedas = [];
+      Object.keys(response.data).map((key, index) => {
+        arrayMoedas.push(<Picker.Item value={index} label={key} />);
+      });
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+      setMoedas(arrayMoedas);
+      setLoading(false);
+    }
+    loadingMoedas();
+  }, []);
+  //loading
+  if (loading) {
+    return (
+      <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
+        <ActivityIndicator color={'#FFF'} size={45} />
+      </View>
+    );
+  } else {
+    //Layout
+    return (
+      <View style={styles.container}>
+        <View style={styles.areaMoeda}>
+          <Text style={styles.moeda}>Selecione uma Moeda</Text>
+          <Picker
+            selectedValue={moedaSelecionada}
+            onValueChange={(moeda, index) => setMoedaSelecionada(moeda)}>
+            {moedas}
+          </Picker>
+
+          <View style={styles.areaValor}>
+            <Text style={styles.moeda}>
+              Digite um valor para converter em moeda
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="EX: 150"
+              keyboardType="numeric"
+            />
+          </View>
         </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+        <TouchableOpacity style={styles.botaoArea}>
+          <Text style={styles.botaoTexto}>Converter</Text>
+        </TouchableOpacity>
 
-export default App;
+        <View style={styles.areaResultado}>
+          <Text style={styles.valorConvertido}>3 USD</Text>
+          <Text style={([styles.valorConvertido], {fontSize: 18, margin: 10})}>
+            Corresponde a
+          </Text>
+          <Text style={styles.valorConvertido}>1,90</Text>
+        </View>
+      </View>
+    );
+  }
+}
