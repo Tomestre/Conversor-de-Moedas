@@ -32,7 +32,9 @@ export default function App() {
       const arrayMoeda = Object.keys(response.data);
       //aqui é feito o Item para o Picker
       arrayMoeda.map((key, index) => {
-        arrayItemMoedas.push(<Picker.Item value={index} label={key} />);
+        arrayItemMoedas.push(
+          <Picker.Item value={index} label={key} key={index} />,
+        );
       });
 
       setMoedas(arrayItemMoedas);
@@ -45,7 +47,7 @@ export default function App() {
   //Request onde busca o preço da moeda na API
   async function converterMoeda() {
     if (valorInput == 0 || moedaSelecionada == null) {
-      alert('Por Favor selecione uma Moeda');
+      alert('Por Favor selecione uma moeda ou digite um valor');
       return;
     }
     const response = await api.get(`all/${nomeMoeda[moedaSelecionada]}-BRL`);
@@ -71,9 +73,10 @@ export default function App() {
         <View style={styles.areaMoeda}>
           <Text style={styles.moeda}>Selecione uma Moeda</Text>
           <Picker
-            selectedValue={moedaSelecionada}
-            onValueChange={(moeda, index) => {
+            selectedValue={moedaSelecionada == null ? '' : moedaSelecionada}
+            onValueChange={moeda => {
               setMoedaSelecionada(moeda);
+              setValorConvertido(0);
             }}>
             {itemMoedas}
           </Picker>
